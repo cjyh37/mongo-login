@@ -58,7 +58,7 @@ app.use(function (err, req, res, next) {
 });
 
 
-const PORT = 8000;
+const PORT = 80;
 app.listen(PORT, function () {
   console.log('Server is started on http://127.0.0.1:'+PORT);
 });
