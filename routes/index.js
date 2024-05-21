@@ -1,38 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
-var Data = require('../models/data');
-var Answer = require('../models/answer');
 const path = require("path");
-const multer = require("multer");
 //const uuid = require("uuid").v4;
 const { v4: uuid} = require("uuid");
-const csv = require('csvtojson');  
 
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-	    //console.log("dest"+file)
-        cb(null, './uploads/data/uploads');
-    },
-    filename: (req, file,cb) => {
-	    //console.log("filename" + file)
-        const ext = path.extname(file.originalname);
-        const id = uuid();
-        const filePath = `images/${id}${ext}`;
-	    console.log("filepath:" + filePath)
-        //File.create({filePath})
-        //.then(() => {
-            cb(null, filePath);
-        //}, (err)=> {
-        // console.log("catch errrr:" + err)
-	//})
-    }
-});
-
-const upload = multer({ storage: storage });
 const static_path = path.join(__dirname, "./public" );
-const static_path2 = path.join(__dirname, "./uploads" );
 
 router.get('/', function (req, res, next) {
 	if (req.session) {
