@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Welcome</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
+	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+	<div class="col-md-4 col-md-offset-4">
+		<div style="display: flex; justify-content: space-between;">
+			<p><a href="/">Home</a></p>
+			<p>User(<%= username %>) Answer/Result Data</p>
+			<p><a href="/logout">Logout</a></p>
+		</div>
+		<div>
+			<center>
+				<table class="table table-hover text-center">
+					<tr><th>data id</th><th>ex id</th><th>data</th><th>points</th></tr>
+				     <% dataa.forEach(data => { %>
+					<tr style="color:red">
+					<td><%= data.answer_id %></td>
+					<td><%= data.ex_id %></td>
+					<td><%= data.answer_data %></td>
+					<td><%= 50*data.points %></td>
+					</tr>
+                                     <% });%>
+				     <% datas.forEach(data => { %>
+					<tr>
+					<td><%= data.data_id %></td>
+					<td><%= data.ex_id %></td>
+					<td><%= data.board_data %></td>
+					<td><%= data.points %></td>
+					</tr>
+                                     <% });%>
+				     <tr><td></td><td></td><td></td><td></td></tr>
+				</table>
+			</center>
+		</div>
+		<div class="abc">
+			<a href="/data">Back</a>
+		</div>
+	</div>
+</body>
+</html>
