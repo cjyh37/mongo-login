@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Message Board</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f8fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .post-box {
+            background-color: #ffffff;
+            border: 1px solid #e1e8ed;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .post-box input, .post-box textarea {
+            width: 100%;
+            border: 1px solid #e1e8ed;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .post-box button {
+            background-color: #1da1f2;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .posts {
+            background-color: #ffffff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .post {
+            border-bottom: 1px solid #e1e8ed;
+            padding: 10px 0;
+        }
+        .post:last-child {
+            border-bottom: none;
+        }
+        .username {
+            font-weight: bold;
+            color: #1da1f2;
+        }
+        .message {
+            margin-top: 5px;
+        }
+        .timestamp {
+            font-size: 0.85em;
+            color: #657786;
+            margin-top: 5px;
+        }
+    </style>
+    
+    <!-- [1] supabase 불러오는 스크립트: supabase라는 전역변수가 만들어짐-->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+    <!-- [1] ends here-->
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="post-box">
+                    <h3>Post a Message</h3>
+                    <!-- ▼ form -->
+                    <form id="post-form">
+                        <!-- ▼ username -->
+                        <input type="text" id="username" name="username" placeholder="Username" required>
+                        <!-- ▼ message -->
+                        <textarea id="message" name="message" rows="3" placeholder="What's happening?" required></textarea>
+                        <!-- ▼ submit button -->
+                        <button type="submit">Post</button>
+                    </form>
+                </div>
+                <div class="posts">
+                    <h3>Messages</h3>
+                    <!-- ▼ post list -->
+                    <div id="post-list">
+                        <!-- Post list will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+
+    // [2] Supabase 프로젝트 URL, key 입력 후 초기화
+    const supabaseUrl = "https://jsjkkqoyrheqwsbmpaef.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzamtrcW95cmhlcXdzYm1wYWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4OTI2ODYsImV4cCI6MjAzMjQ2ODY4Nn0.LzFfWrS7WHhiNS8XkIcoaeVcKYunYukSGHQjF2isEF8";
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
+    // [2] ends here
+    
+
+    // [3] 데이터를 불러올 함수 refreshHistory 생성
+    async function refreshHistory() {
+        // async가 쓰인 이유? await - 동기적으로 바꿔주는 코드는 async funtion에 담아야함
+         
+        // [3-1] DB 내 page 테이블에서 모든 행 읽고 로그에 표시. 
+        let { data, error } = await client.from('page').select("*");  // await - 동기적으로 바꿔주는 코드
+        
+        // [3-2] 에러발생 시 console에 표시
+        if (error) {
+            console.error('Error fetching data:', error);
+            return;
+        }
+
+        // [3-3] 불러온 데이터 console에 표시
+        console.log('Data Extracted:', data);
+
+        // [3-4] 불러온 데이터 tag 변수에 할당하기
+        let tag = "";
+        for (let i = 0; i < data.length; i++) {
+            tag += `<div class="post">
+                        <div class="username">${data[i].name}</div>
+                        <div class="message">${data[i].body}</div>
+                        <div class='timestamp'>${data[i].created_at}</div>
+                    </div>`;
+        }
+        // [3-5] HTML 내 업데이트하기
+        document.getElementById("post-list").innerHTML = tag;
+    }
+
+
+    // [3] ends here
+
+    refreshHistory();
+
+    // [4] Form에 입력된 데이터를 DB에 입력하는 함수 recordHandler 생성
+    async function recordHandler() {
+        // async가 쓰인 이유? await - 동기적으로 바꿔주는 코드는 async funtion에 담아야함
+        
+        // [4-1] Form에 입력된 값 변수에 저장
+        const username = document.getElementById("username").value;
+        const message = document.getElementById("message").value;
+
+        // [4-2] 입력받은 데이터 입력
+        const { data, error } = await client
+            .from("page")
+            .insert([{ name: username, body: message }]);
+        
+        // [4-3] 에러발생 시 콘솔에 표시
+        if (error) {
+            console.error('Error inserting data:', error);
+            return;
+        }
+
+        // [4-4] 입력된 값 콘솔에 표시
+        console.log('Data inserted:', data);
+        
+        // [4-5] 입력된 폼 초기화 
+        document.getElementById('post-form').reset();
+
+        // [4-6] 데이터 새로고침
+        refreshHistory();
+    }
+    // [4] ends here
+
+    // [5] 이벤트 리스너 추가
+    document.getElementById("post-form").addEventListener("submit", function(event) {
+        event.preventDefault(); // 제출 버튼 클릭될 때 페이지 새로고침되는 것을 방지
+        recordHandler();
+    });
+
+
+    </script>
+</html>
